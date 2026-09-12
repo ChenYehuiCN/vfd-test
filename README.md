@@ -1,63 +1,66 @@
 # vfd-test
 
-一个用 **STC89C52RC** 驱动 8 位 14 段 VFD 的小项目。
+[简体中文文档](README_zh-CN.md)
 
-这个项目最初就是想做一块“能亮、能显示、还能从 USB 串口打字”的 VFD 测试板。板子已经打出来并跑通了，代码和原理图一起放出来，方便自己留档，也方便对 VFD、升压和老派 8051 单片机感兴趣的朋友拿去参考。
+A small project for driving an 8-digit, 14-segment VFD with an **STC89C52RC**.
 
-![VFD 实物](vfd.jpg)
+The original goal was simple: make a VFD test board that lights up, displays characters, and accepts text over a USB serial port. The board has been built and tested, so the firmware and schematics are shared here for reference and for anyone who enjoys VFDs, boost converters, and classic 8051 microcontrollers.
 
-## 现在能做什么
+![VFD board](vfd.jpg)
 
-- 驱动 8 位 14 段 VFD 显示屏
-- 使用 3 片 TBD62783AFG 做栅极/阳极段线驱动
-- STC89C52RC 负责扫描显示和串口接收
-- USB-C 接口通过 CH340N 提供 USB 串口
-- 串口默认参数为 `9600 8N1`
-- 固件内置一套 ASCII 字库，收到字符后会向左滚动显示
+## What it can do
 
-简单说，插上 USB、烧录固件、打开串口终端，然后敲字就行。
+- Drive an 8-digit, 14-segment VFD
+- Use three TBD62783AFG driver arrays for the grid/anode and segment lines
+- Scan the display and receive serial data with an STC89C52RC
+- Provide a USB serial port through a CH340N and USB-C connector
+- Include an RTS-based automatic cold-start circuit for one-click programming with STC-ISP
+- Use `9600 8N1` as the default serial format
+- Receive ASCII characters and scroll them to the left using the built-in font table
 
-## 仓库结构
+In short: plug in USB, flash the firmware, open a serial terminal, and start typing.
+
+## Repository layout
 
 ```text
 .
-├── vfd-test-firmware/       # Keil C51 工程和 STC89C52RC 固件
+├── vfd-test-firmware/       # Keil C51 project and STC89C52RC firmware
 │   ├── main.c
-│   └── Objects/              # 编译生成的 HEX 等文件
-├── vfd-test-pcb/             # 原理图工程、备份和 PDF 原理图
-├── vfd.jpg                   # 实物照片
+│   └── Objects/              # Generated HEX and other build files
+├── vfd-test-pcb/             # Schematic project, backups, and schematic PDF
+├── vfd.jpg                   # Photo of the assembled board
 └── LICENSE                   # MIT License
 ```
 
-## 硬件概览
+## Hardware overview
 
-核心器件大致如下：
+The main parts are:
 
-- MCU：STC89C52RC-40I-PDIP40
-- USB 转串口：CH340N
-- VFD 驱动：TBD62783AFG × 3
-- 栅极/阳极升压：LMR64010
-- 灯丝驱动：DRV8837
-- 8051 晶振：11.0592 MHz
-- 显示屏：8 位、14 段 VFD（本项目使用 D1319WF）
+- MCU: STC89C52RC-40I-PDIP40
+- USB-to-serial bridge: CH340N
+- VFD drivers: TBD62783AFG × 3
+- Grid/anode boost converter: LMR64010
+- Filament driver: DRV8837
+- 8051 crystal: 11.0592 MHz
+- Display: 8-digit, 14-segment VFD (D1319WF in this project)
 
-## 电压参数
+## Voltage settings
 
-下面是这块板子实测下来比较合适的一组工作点，换 VFD 或者换电源方案时不要机械照抄，最好重新测一下。
+These are the working points that turned out to be suitable for this particular board and tube. They are starting points, not universal values; re-check them when using a different VFD or power circuit.
 
-- 灯丝两端电压：约 **2 Vrms**
-- 栅极、阳极对系统地：约 **30 V**
-- 灯丝整体对系统地：约 **25 V**
+- Voltage across the two filament terminals: approximately **2 Vrms**
+- Grid and anode voltage relative to system ground: approximately **30 V**
+- Filament voltage relative to system ground: approximately **25 V**
 
-这里的 25 V 不是灯丝两端的电压，而是灯丝驱动波形的直流工作点。灯丝电压相对系统地叠加了约 5 V 直流偏置，这样可以让灯丝与栅极/阳极之间的实际电位关系更合适，减少 VFD 的鬼影。调试时一定要区分“灯丝两端电压”和“灯丝对地电压”。
+The 25 V value is not the voltage across the filament. It is the filament's DC operating point relative to system ground, with an approximately 5 V DC bias superimposed on the filament drive. This gives the filament and the grid/anode a more suitable potential relationship and helps reduce VFD ghosting. When debugging, distinguish carefully between the voltage across the filament and the voltage from the filament to ground.
 
-升压部分工作时会发热，输出端也有储能电容。测量和改线前请先断电，并给电容留出放电时间。
+The boost section gets hot during operation, and its output capacitors can remain charged. Turn the board off and allow the capacitors to discharge before probing or changing wiring.
 
-## VFD 段线映射
+## VFD segment mapping
 
-### 常规七段部分
+### Conventional seven-segment part
 
-| 常规段 | VFD 引脚 |
+| Segment | VFD pin |
 | --- | --- |
 | a | P4 |
 | b | P3 |
@@ -65,79 +68,83 @@
 | d | P5 |
 | e | P6 |
 | f | P11 |
-| g（左半） | P12 |
-| g（右半） | P13 |
+| g (left half) | P12 |
+| g (right half) | P13 |
 
-### 米字和中间竖线
+### Starburst and center vertical segments
 
-| 位置 | VFD 引脚 |
+| Position | VFD pin |
 | --- | --- |
-| 左上斜线 | P10 |
-| 左下斜线 | P7 |
-| 右下斜线 | P9 |
-| 右上斜线 | P2 |
-| 中间竖线（上） | P1 |
-| 中间竖线（下） | P8 |
+| Upper-left diagonal | P10 |
+| Lower-left diagonal | P7 |
+| Lower-right diagonal | P9 |
+| Upper-right diagonal | P2 |
+| Upper center vertical | P1 |
+| Lower center vertical | P8 |
 
-单片机侧的连接关系是：
+The corresponding MCU connections are:
 
-- `P3.7 ~ P3.2` 对应 VFD `P14 ~ P9`
-- `P2.7 ~ P2.0` 对应 VFD `P1 ~ P8`
+- `P3.7 ~ P3.2` correspond to VFD `P14 ~ P9`
+- `P2.7 ~ P2.0` correspond to VFD `P1 ~ P8`
 
-字库在 [`vfd-test-firmware/main.c`](vfd-test-firmware/main.c) 里，段线如果换了接法，主要改这里即可。
+The font table is in [`vfd-test-firmware/main.c`](vfd-test-firmware/main.c). If the segment wiring changes, this is the main place to update.
 
-## 固件使用
+## Using the firmware
 
-当前固件启动后会扫描 8 个显示位。串口收到一个字符，就把字符放入显示缓冲区并向左移动显示。
+After startup, the firmware scans all eight display positions. Each character received over serial is inserted into the display buffer and shifts the existing text to the left.
 
-Linux 下可以用 minicom：
+On Linux, minicom can be used as follows:
 
 ```bash
 minicom -D /dev/ttyUSB0 -b 9600
 ```
 
-也可以使用其他串口工具，参数设置为：
+The serial settings are:
 
 ```text
-波特率：9600
-数据位：8
-校验位：None
-停止位：1
-流控：None
+Baud rate: 9600
+Data bits: 8
+Parity: None
+Stop bits: 1
+Flow control: None
 ```
 
-终端是否回显由串口软件决定；固件主要负责接收字符并显示，不保证把字符原样回传到终端。
+Whether typed characters are echoed is controlled by the terminal program. The firmware mainly receives characters and displays them; it does not promise to echo them back to the host.
 
-## 编译与烧录
+## Building and programming
 
-固件工程是 Keil C51 工程，打开：
+The firmware is a Keil C51 project. Open:
 
 ```text
 vfd-test-firmware/vfd-test-firmware.uvproj
 ```
 
-编译后可以使用生成的：
+After building, the generated file can be found at:
 
 ```text
 vfd-test-firmware/Objects/vfd-test-firmware.hex
 ```
 
-再用支持 STC89C52RC 的烧录工具写入单片机即可。不同烧录器的冷启动/串口接线方式可能不一样，请按自己的烧录器说明操作。
+Use an STC89C52RC-compatible programmer to flash the HEX file. The board includes an automatic cold-start circuit driven by the USB-UART chip's RTS signal, so STC-ISP can enter programming mode, erase, and program the MCU with one click—no manual power cycling required.
 
-## 还可以继续玩的方向
+If you use a different programmer, its cold-start and serial wiring may be different. Follow that programmer's instructions.
 
-- 增加亮度控制和显示开关
-- 做更完整的 Unicode/中文点阵扩展
-- 把字库和显示扫描拆成更容易复用的模块
-- 优化升压和灯丝驱动的效率、温升与 EMI
-- 给 PCB 加测试点和外壳
+## Ideas for future work
 
-## 注意事项
+- Add brightness control and a display enable switch
+- Add a more complete Unicode or Chinese dot-matrix extension
+- Split the font table and display scanner into reusable modules
+- Improve boost and filament-driver efficiency, thermal performance, and EMI
+- Add test points and an enclosure to the PCB
 
-这是一个实验性质的第一版硬件，参数和布局都是围绕手头这块 VFD 调出来的。VFD 电源虽然只有几十伏，但升压电路、电容和驱动波形仍然可能造成烫伤、短路或器件损坏；上电时不要直接用手碰测试点，示波器测量时注意探头地夹的位置。
+## Safety notes
 
-如果你复刻了这块板子，欢迎根据自己的屏管型号重新调整灯丝电压、栅极/阳极电压和限流参数。
+This is a first-revision experimental board. Its parameters and layout were tuned around the VFD on hand. Although the VFD supply is only in the tens of volts, the boost converter, capacitors, and drive waveforms can still cause burns, shorts, or component damage.
+
+Do not touch the grids, anodes, filament driver, or related test points while the circuit is operating. The human body conducts electricity: touching the circuit can conduct grid/anode voltage through the body to the MCU and make it behave abnormally. It can also conduct interference or voltage into the filament-supply LDO, raising the filament voltage and, in a serious case, making the filament glow red. Power the board off and let the capacitors discharge before measuring or rewiring it. When using an oscilloscope, pay close attention to where the probe ground clip is connected.
+
+If you recreate this board, adjust the filament voltage, grid/anode voltage, and current-limiting values for your own VFD.
 
 ## License
 
-本项目采用 [MIT License](LICENSE) 开源。
+This project is released under the [MIT License](LICENSE). You are free to use, modify, and redistribute it, provided that the original copyright and license notices are retained. See the `LICENSE` file for the complete terms.
