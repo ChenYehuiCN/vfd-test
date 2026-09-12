@@ -1,6 +1,6 @@
-# vfd-test
+[简体中文](README_zh-CN.md)
 
-[简体中文文档](README_zh-CN.md)
+# vfd-test
 
 A small project for driving an 8-digit, 14-segment VFD with an **STC89C52RC**.
 

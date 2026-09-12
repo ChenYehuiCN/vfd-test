@@ -1,3 +1,5 @@
+[English](README.md)
+
 # vfd-test
 
 一个用 **STC89C52RC** 驱动 8 位 14 段 VFD 的小项目。

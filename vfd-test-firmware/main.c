@@ -1,4 +1,8 @@
-/* main.c */
+/* main.c 
+ *
+ * Copyright (c) 2026 Chen Yehui
+ * SPDX-License-Identifier: MIT
+ */
 
 #include <reg52.h>
 
