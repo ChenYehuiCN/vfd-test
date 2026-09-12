@@ -27,7 +27,7 @@ volatile unsigned char display_buffer[DIGIT_COUNT] = {
  */
 code unsigned short font_table[95] = {
 	0x0000, // space
-	0x0088, // !
+	0x0080, // !
 	0x00A0, // "
 	0xE0A9, // #
 	0xF099, // $
