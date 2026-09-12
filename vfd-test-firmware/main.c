@@ -27,33 +27,33 @@ volatile unsigned char display_buffer[DIGIT_COUNT] = {
  */
 code unsigned short font_table[95] = {
 	0x0000, // space
-	0x8020, // !
+	0x0088, // !
 	0x00A0, // "
 	0xE0A9, // #
 	0xF099, // $
-	0xFCC3, // %
-	0x2C9C, // &
+	0x9042, // %
+	0xB05A, // &
 	0x0080, // '
 	0x0440, // (
 	0x0802, // )
-	0x6CC3, // *
+	0x6C42, // *
 	0x6081, // +
 	0x0002, // ,
 	0x6000, // -
-	0x0000, // . (no decimal-point output is wired)
+	0x0400, // . 
 	0x0042, // /
 	0x907E, // 0
 	0x8060, // 1
 	0x603C, // 2
 	0xC038, // 3
 	0xF020, // 4
-	0x3418, // 5
+	0xF018, // 5
 	0xF01C, // 6
 	0x8030, // 7
 	0xF03C, // 8
 	0xF038, // 9
-	0x0081, // :
-	0x0082, // ;
+	0x2008, // :
+	0x2002, // ;
 	0x2440, // <
 	0x6008, // =
 	0x4802, // >
@@ -77,18 +77,18 @@ code unsigned short font_table[95] = {
 	0x7034, // P
 	0x943C, // Q
 	0x7434, // R
-	0xF018, // S
+	0xE818, // S
 	0x0091, // T
 	0x902C, // U
 	0x1046, // V
 	0x9426, // W
 	0x0C42, // X
-	0xF028, // Y
+	0x0841, // Y
 	0x005A, // Z
 	0x101C, // [
 	0x0C00, // backslash
 	0x8038, // ]
-	0x0402, // ^
+	0x1800, // ^
 	0x0008, // _
 	0x0800, // `
 	0x200D, // a
@@ -120,21 +120,21 @@ code unsigned short font_table[95] = {
 	0x281A, // {
 	0x0081, // |
 	0x4458, // }
-	0x6042, // ~
+	0x1880, // ~
 };
 
-void timer1_init(void)
+void timer0_init(void)
 {
-	TMOD &= 0x0F;
-	TMOD |= 0x20;
-	TH1 = 0x00;
-	TL1 = 0x00;
-	ET1 = 1;
+	TMOD &= 0xF0;
+	TMOD |= 0x02;
+	TH0 = 0x00;
+	TL0 = 0x00;
+	ET0 = 1;
 	EA  = 1;
-	TR1 = 1;
+	TR0 = 1;
 }
 
-void timer1_isr(void) interrupt 3
+void timer0_isr(void) interrupt 1
 {
 	if (VF_OK) {
 		unsigned char ch = display_buffer[gate];
@@ -145,7 +145,7 @@ void timer1_isr(void) interrupt 3
 			display = font_table[ch - ' '];
 		VGP_ON = 1;
 		P1 = 0x00;
-		P3 = (P3 & 0x03) | (unsigned char)(display >> 8);
+		P3 = 0x03 | (unsigned char)(display >> 8);
 		P2 = (char)display;
 		P1 = (unsigned char)0x01 << gate;
 		gate = (gate + 1) % DIGIT_COUNT;
@@ -153,14 +153,47 @@ void timer1_isr(void) interrupt 3
 		VGP_ON = 0;
 }
 
+void uart_init(void)
+{
+	SCON = 0x50;
+	TMOD &= 0x0F;
+	TMOD |= 0x20;
+	PCON &= 0x7F;
+	TH1 = 0xFD;
+	TL1 = 0xFD;
+	TR1 = 1;
+	ES = 1;
+	EA = 1;
+}
+
+void uart_isr(void) interrupt 4
+{
+	unsigned char ch;
+	unsigned char i;
+	if (RI) {
+		RI = 0;
+		ch = SBUF;
+		ET0 = 0;
+		for (i = 0; i < DIGIT_COUNT - 1; i++) {
+			display_buffer[i] = display_buffer[i + 1];
+		}
+		display_buffer[DIGIT_COUNT - 1] = ch;
+		ET0 = 1;
+	}
+	if (TI) {
+		TI = 0;
+	}
+}
+
 void main(void)
 {
 	P0 = 0x00;
 	P1 = 0x00;
 	P2 = 0x00;
-	P3 = 0x00;
+	P3 = 0x03;
 	VF_OK = 1;
-	timer1_init();
+	timer0_init();
+	uart_init();
 	VF_ON = 1;
 	while (1);
 }

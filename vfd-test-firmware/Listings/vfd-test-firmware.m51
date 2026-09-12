@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                    09/12/2026  17:52:57  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                    09/13/2026  00:25:31  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V6.22.4.0, INVOKED BY:
@@ -29,15 +29,19 @@ LINK MAP OF MODULE:  .\Objects\vfd-test-firmware (?C_STARTUP)
 
             * * * * * * *   C O D E   M E M O R Y   * * * * * * *
             CODE    0000H     0003H     ABSOLUTE     
-                    0003H     0018H                  *** GAP ***
-            CODE    001BH     0003H     ABSOLUTE     
-                    001EH     07E2H                  *** GAP ***
+                    0003H     0008H                  *** GAP ***
+            CODE    000BH     0003H     ABSOLUTE     
+                    000EH     0015H                  *** GAP ***
+            CODE    0023H     0003H     ABSOLUTE     
+                    0026H     07DAH                  *** GAP ***
             CODE    0800H     00BEH     UNIT         ?CO?MAIN
             CODE    08BEH     008CH     UNIT         ?C_C51STARTUP
-            CODE    094AH     007EH     UNIT         ?PR?TIMER1_ISR?MAIN
-            CODE    09C8H     0012H     UNIT         ?PR?TIMER1_INIT?MAIN
-            CODE    09DAH     0012H     UNIT         ?PR?MAIN?MAIN
-            CODE    09ECH     000EH     UNIT         ?C_INITSEG
+            CODE    094AH     007AH     UNIT         ?PR?TIMER0_ISR?MAIN
+            CODE    09C4H     0040H     UNIT         ?PR?UART_ISR?MAIN
+            CODE    0A04H     0019H     UNIT         ?PR?UART_INIT?MAIN
+            CODE    0A1DH     0016H     UNIT         ?PR?MAIN?MAIN
+            CODE    0A33H     0012H     UNIT         ?PR?TIMER0_INIT?MAIN
+            CODE    0A45H     000EH     UNIT         ?C_INITSEG
 
 
 
@@ -52,15 +56,16 @@ SEGMENT                          DATA_GROUP
   +--> ?C_INITSEG
 
 ?PR?MAIN?MAIN                  -----    -----
-  +--> ?PR?TIMER1_INIT?MAIN
+  +--> ?PR?TIMER0_INIT?MAIN
+  +--> ?PR?UART_INIT?MAIN
+
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/13/2026  00:25:31  PAGE 2
+
 
 *** NEW ROOT ***************************************************
 
-?PR?TIMER1_ISR?MAIN            0011H    0003H
+?PR?TIMER0_ISR?MAIN            0011H    0003H
   +--> ?CO?MAIN
-
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/12/2026  17:52:57  PAGE 2
-
 
 
 
@@ -109,43 +114,53 @@ SYMBOL TABLE OF MODULE:  .\Objects\vfd-test-firmware (?C_STARTUP)
   D:0090H         PUBLIC        P1
   D:00A0H         PUBLIC        P2
   D:00B0H         PUBLIC        P3
-  C:094AH         PUBLIC        timer1_isr
+  C:094AH         PUBLIC        timer0_isr
   B:00A8H.7       PUBLIC        EA
   D:00A8H         PUBLIC        IE
   B:0080H.1       PUBLIC        VF_OK
+  B:00A8H.4       PUBLIC        ES
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/13/2026  00:25:31  PAGE 3
+
+
   D:00B8H         PUBLIC        IP
   B:0080H.0       PUBLIC        VF_ON
+  B:0098H.0       PUBLIC        RI
+  B:0098H.1       PUBLIC        TI
   D:0008H         PUBLIC        gate
   C:0800H         PUBLIC        font_table
-  C:09DAH         PUBLIC        main
+  C:0A1DH         PUBLIC        main
+  D:0099H         PUBLIC        SBUF
+  D:0087H         PUBLIC        PCON
   D:0098H         PUBLIC        SCON
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/12/2026  17:52:57  PAGE 3
-
-
   D:0089H         PUBLIC        TMOD
   D:0088H         PUBLIC        TCON
-  B:00A8H.3       PUBLIC        ET1
+  B:00A8H.1       PUBLIC        ET0
+  D:008CH         PUBLIC        TH0
   D:008DH         PUBLIC        TH1
+  D:008AH         PUBLIC        TL0
   D:008BH         PUBLIC        TL1
+  C:0A04H         PUBLIC        uart_init
+  B:0088H.4       PUBLIC        TR0
   B:0088H.6       PUBLIC        TR1
   D:0009H         PUBLIC        display_buffer
   D:00C8H         PUBLIC        T2CON
+  C:0A33H         PUBLIC        timer0_init
   B:0080H.2       PUBLIC        VGP_ON
-  C:09C8H         PUBLIC        timer1_init
+  C:09C4H         PUBLIC        uart_isr
   D:00D0H         PUBLIC        PSW
-  -------         PROC          TIMER1_INIT
-  C:09C8H         LINE#         126
-  C:09C8H         LINE#         127
-  C:09C8H         LINE#         128
-  C:09CBH         LINE#         129
-  C:09CEH         LINE#         130
-  C:09D1H         LINE#         131
-  C:09D3H         LINE#         132
-  C:09D5H         LINE#         133
-  C:09D7H         LINE#         134
-  C:09D9H         LINE#         135
-  -------         ENDPROC       TIMER1_INIT
-  -------         PROC          TIMER1_ISR
+  -------         PROC          TIMER0_INIT
+  C:0A33H         LINE#         126
+  C:0A33H         LINE#         127
+  C:0A33H         LINE#         128
+  C:0A36H         LINE#         129
+  C:0A39H         LINE#         130
+  C:0A3CH         LINE#         131
+  C:0A3EH         LINE#         132
+  C:0A40H         LINE#         133
+  C:0A42H         LINE#         134
+  C:0A44H         LINE#         135
+  -------         ENDPROC       TIMER0_INIT
+  -------         PROC          TIMER0_ISR
   -------         DO            
   D:0011H         SYMBOL        ch
   D:0012H         SYMBOL        display
@@ -159,33 +174,72 @@ SYMBOL TABLE OF MODULE:  .\Objects\vfd-test-firmware (?C_STARTUP)
   C:098FH         LINE#         146
   C:0991H         LINE#         147
   C:0994H         LINE#         148
-  C:099EH         LINE#         149
-  C:09A1H         LINE#         150
-  C:09B0H         LINE#         151
-  C:09B7H         LINE#         152
-  C:09B9H         LINE#         153
-  C:09BBH         LINE#         154
-  -------         ENDPROC       TIMER1_ISR
+  C:099AH         LINE#         149
+  C:099DH         LINE#         150
+  C:09ACH         LINE#         151
+  C:09B3H         LINE#         152
+  C:09B5H         LINE#         153
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/13/2026  00:25:31  PAGE 4
+
+
+  C:09B7H         LINE#         154
+  -------         ENDPROC       TIMER0_ISR
+  -------         PROC          UART_INIT
+  C:0A04H         LINE#         156
+  C:0A04H         LINE#         157
+  C:0A04H         LINE#         158
+  C:0A07H         LINE#         159
+  C:0A0AH         LINE#         160
+  C:0A0DH         LINE#         161
+  C:0A10H         LINE#         162
+  C:0A13H         LINE#         163
+  C:0A16H         LINE#         164
+  C:0A18H         LINE#         165
+  C:0A1AH         LINE#         166
+  C:0A1CH         LINE#         167
+  -------         ENDPROC       UART_INIT
+  -------         PROC          UART_ISR
+  -------         DO            
+  D:0007H         SYMBOL        ch
+  D:0006H         SYMBOL        i
+  -------         ENDDO         
+  C:09C4H         LINE#         169
+  C:09D3H         LINE#         173
+  C:09D6H         LINE#         174
+  C:09D8H         LINE#         175
+  C:09DAH         LINE#         176
+  C:09DCH         LINE#         177
+  C:09DEH         LINE#         178
+  C:09EAH         LINE#         179
+  C:09EEH         LINE#         180
+  C:09F0H         LINE#         181
+  C:09F2H         LINE#         182
+  C:09F2H         LINE#         183
+  C:09F5H         LINE#         184
+  C:09F7H         LINE#         185
+  C:09F7H         LINE#         186
+  -------         ENDPROC       UART_ISR
   -------         PROC          MAIN
-  C:09DAH         LINE#         156
-  C:09DAH         LINE#         157
-  C:09DAH         LINE#         158
-  C:09DDH         LINE#         159
-  C:09DFH         LINE#         160
-  C:09E1H         LINE#         161
-  C:09E3H         LINE#         162
-  C:09E5H         LINE#         163
-  C:09E8H         LINE#         164
-  C:09EAH         LINE#         165
+  C:0A1DH         LINE#         188
+  C:0A1DH         LINE#         189
+  C:0A1DH         LINE#         190
+  C:0A20H         LINE#         191
+  C:0A22H         LINE#         192
+  C:0A24H         LINE#         193
+  C:0A27H         LINE#         194
+  C:0A29H         LINE#         195
+  C:0A2CH         LINE#         196
+  C:0A2FH         LINE#         197
+  C:0A31H         LINE#         198
   -------         ENDPROC       MAIN
   -------         ENDMOD        MAIN
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/12/2026  17:52:57  PAGE 4
-
-
 
 ******************************************************************************
-* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 017FH BYTE (18%) *
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 01DBH BYTE (23%) *
 ******************************************************************************
 
-Program Size: data=21.0 xdata=0 code=512
+Program Size: data=21.0 xdata=0 code=604
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/13/2026  00:25:31  PAGE 5
+
+
 LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
