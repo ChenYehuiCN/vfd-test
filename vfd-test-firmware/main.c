@@ -122,14 +122,15 @@ void timer1_init(void)
 void timer1_isr(void) interrupt 3
 {
 	if (VF_OK) {
-			VGP_ON = 1;
-			P1 = 0x00;
-			P3 = (char)(font_table[display_buffer[gate]] >> 8);
-			P2 = (char)font_table[display_buffer[gate]];
-			P1 = (unsigned char)0x01 << gate;
-			gate = (gate + 1) % DIGIT_COUNT;
-		} else
-			VGP_ON = 0;
+		short display = font_table[display_buffer[gate] - ' '];
+		VGP_ON = 1;
+		P1 = 0x00;
+		P3 = (char)(display >> 8);
+		P2 = (char)display;
+		P1 = (unsigned char)0x01 << gate;
+		gate = (gate + 1) % DIGIT_COUNT;
+	} else
+		VGP_ON = 0;
 }
 
 void main(void)
