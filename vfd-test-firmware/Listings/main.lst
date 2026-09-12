@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MAIN                                                              09/12/2026 16:13:38 PAGE 1   
+C51 COMPILER V9.60.7.0   MAIN                                                              09/12/2026 17:52:57 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
@@ -19,152 +19,173 @@ line level    source
    9          sbit VGP_ON = P0^2;
   10          
   11          volatile unsigned char gate = 0;
-  12          unsigned char display_buffer[DIGIT_COUNT] = {0};
-  13          code unsigned short font_table[95] = {
-  14            0x0000, // space
-  15            0x0000, // ! 
-  16            0x0000, // " 
-  17            0x0000, // # 
-  18            0x0000, // $ 
-  19            0x0000, // % 
-  20            0x0000, // & 
-  21            0x0000, // ' 
-  22            0x0000, // ( 
-  23            0x0000, // ) 
-  24            0x0000, // * 
-  25            0x0000, // + 
-  26            0x0000, // , 
-  27            0x0000, // - 
-  28            0x0000, // . 
-  29            0x0000, // slash
-  30            0x0000, // 0 
-  31            0x0000, // 1 
-  32            0x0000, // 2 
-  33            0x0000, // 3 
-  34            0x0000, // 4 
-  35            0x0000, // 5 
-  36            0x0000, // 6 
-  37            0x0000, // 7 
-  38            0x0000, // 8 
-  39            0x0000, // 9 
-  40            0x0000, // : 
-  41            0x0000, // ; 
-  42            0x0000, // < 
-  43            0x0000, // = 
-  44            0x0000, // > 
-  45            0x0000, // ? 
-  46            0x0000, // @ 
-  47            0x0000, // A 
-  48            0x0000, // B 
-  49            0x0000, // C 
-  50            0x0000, // D 
-  51            0x0000, // E 
-  52            0x0000, // F 
-  53            0x0000, // G 
-  54            0x0000, // H 
-C51 COMPILER V9.60.7.0   MAIN                                                              09/12/2026 16:13:38 PAGE 2   
+  12          volatile unsigned char display_buffer[DIGIT_COUNT] = {
+  13            ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+  14          };
+  15          
+  16          /*
+  17           * Segment wiring used by this table:
+  18           *
+  19           *   A=a=P4, B=b=P3, C=c=P14, D=d=P5, E=e=P6, F=f=P11
+  20           *   G1=g(left)=P12, G2=g(right)=P13
+  21           *   H=upper-left diagonal=P10, J=upper vertical=P1
+  22           *   K=upper-right diagonal=P2, L=lower-left diagonal=P7
+  23           *   M=lower vertical=P8, N=lower-right diagonal=P9
+  24           *
+  25           * The table index is ASCII - ' '.  Bit 0 of each entry is P8/P2.0,
+  26           * bit 7 is P1/P2.7, and bits 10..15 are P9..P14 on P3.2..P3.7.
+  27           */
+  28          code unsigned short font_table[95] = {
+  29            0x0000, // space
+  30            0x8020, // !
+  31            0x00A0, // "
+  32            0xE0A9, // #
+  33            0xF099, // $
+  34            0xFCC3, // %
+  35            0x2C9C, // &
+  36            0x0080, // '
+  37            0x0440, // (
+  38            0x0802, // )
+  39            0x6CC3, // *
+  40            0x6081, // +
+  41            0x0002, // ,
+  42            0x6000, // -
+  43            0x0000, // . (no decimal-point output is wired)
+  44            0x0042, // /
+  45            0x907E, // 0
+  46            0x8060, // 1
+  47            0x603C, // 2
+  48            0xC038, // 3
+  49            0xF020, // 4
+  50            0x3418, // 5
+  51            0xF01C, // 6
+  52            0x8030, // 7
+  53            0xF03C, // 8
+  54            0xF038, // 9
+C51 COMPILER V9.60.7.0   MAIN                                                              09/12/2026 17:52:57 PAGE 2   
 
-  55            0x0000, // I 
-  56            0x0000, // J 
-  57            0x0000, // K 
-  58            0x0000, // L 
-  59            0x0000, // M 
-  60            0x0000, // N 
-  61            0x0000, // O 
-  62            0x0000, // P 
-  63            0x0000, // Q 
-  64            0x0000, // R 
-  65            0x0000, // S 
-  66            0x0000, // T 
-  67            0x0000, // U 
-  68            0x0000, // V 
-  69            0x0000, // W 
-  70            0x0000, // X 
-  71            0x0000, // Y 
-  72            0x0000, // Z 
-  73            0x0000, // [ 
-  74            0x0000, // backslash
-  75            0x0000, // ] 
-  76            0x0000, // ^ 
-  77            0x0000, // _ 
-  78            0x0000, // ` 
-  79            0x0000, // a 
-  80            0x0000, // b 
-  81            0x0000, // c 
-  82            0x0000, // d 
-  83            0x0000, // e 
-  84            0x0000, // f 
-  85            0x0000, // g 
-  86            0x0000, // h 
-  87            0x0000, // i 
-  88            0x0000, // j 
-  89            0x0000, // k 
-  90            0x0000, // l 
-  91            0x0000, // m 
-  92            0x0000, // n 
-  93            0x0000, // o 
-  94            0x0000, // p 
-  95            0x0000, // q 
-  96            0x0000, // r 
-  97            0x0000, // s 
-  98            0x0000, // t 
-  99            0x0000, // u 
- 100            0x0000, // v 
- 101            0x0000, // w 
- 102            0x0000, // x 
- 103            0x0000, // y 
- 104            0x0000, // z 
- 105            0x0000, // { 
- 106            0x0000, // | 
- 107            0x0000, // } 
- 108            0x0000, // ~ 
- 109          };
- 110          
- 111          void timer1_init(void)
- 112          {
- 113   1        TMOD &= 0x0F;
- 114   1        TMOD |= 0x20;
- 115   1        TH1 = 0x00;
- 116   1        TL1 = 0x00;
-C51 COMPILER V9.60.7.0   MAIN                                                              09/12/2026 16:13:38 PAGE 3   
+  55            0x0081, // :
+  56            0x0082, // ;
+  57            0x2440, // <
+  58            0x6008, // =
+  59            0x4802, // >
+  60            0x4031, // ?
+  61            0x50BC, // @
+  62            0xF034, // A
+  63            0xC0B9, // B
+  64            0x101C, // C
+  65            0x80B9, // D
+  66            0x301C, // E
+  67            0x3014, // F
+  68            0xD01C, // G
+  69            0xF024, // H
+  70            0x0099, // I
+  71            0x802C, // J
+  72            0x3444, // K
+  73            0x100C, // L
+  74            0x9864, // M
+  75            0x9C24, // N
+  76            0x903C, // O
+  77            0x7034, // P
+  78            0x943C, // Q
+  79            0x7434, // R
+  80            0xF018, // S
+  81            0x0091, // T
+  82            0x902C, // U
+  83            0x1046, // V
+  84            0x9426, // W
+  85            0x0C42, // X
+  86            0xF028, // Y
+  87            0x005A, // Z
+  88            0x101C, // [
+  89            0x0C00, // backslash
+  90            0x8038, // ]
+  91            0x0402, // ^
+  92            0x0008, // _
+  93            0x0800, // `
+  94            0x200D, // a
+  95            0x340C, // b
+  96            0x600C, // c
+  97            0xC02A, // d
+  98            0x200E, // e
+  99            0x6041, // f
+ 100            0xC068, // g
+ 101            0x3005, // h
+ 102            0x0001, // i
+ 103            0x0086, // j
+ 104            0x04C1, // k
+ 105            0x1004, // l
+ 106            0xE005, // m
+ 107            0x2005, // n
+ 108            0xE00C, // o
+ 109            0x3804, // p
+ 110            0xC060, // q
+ 111            0x2004, // r
+ 112            0x4408, // s
+ 113            0x300C, // t
+ 114            0x800C, // u
+ 115            0x0006, // v
+ 116            0x8406, // w
+C51 COMPILER V9.60.7.0   MAIN                                                              09/12/2026 17:52:57 PAGE 3   
 
- 117   1        ET1 = 1;
- 118   1        EA  = 1;
- 119   1        TR1 = 1;
- 120   1      }
- 121          
- 122          void timer1_isr(void) interrupt 3
- 123          {
- 124   1        if (VF_OK) {
- 125   2            VGP_ON = 1;
- 126   2            P1 = 0x00;
- 127   2            P3 = (char)(font_table[display_buffer[gate]] >> 8);
- 128   2            P2 = (char)font_table[display_buffer[gate]];
- 129   2            P1 = (unsigned char)0x01 << gate;
- 130   2            gate = (gate + 1) % DIGIT_COUNT;
- 131   2          } else
- 132   1            VGP_ON = 0;
- 133   1      }
- 134          
- 135          void main(void)
- 136          {
- 137   1        P0 = 0x00;
- 138   1        P1 = 0x00;
- 139   1        P2 = 0x00;
- 140   1        P3 = 0x00;
- 141   1        VF_OK = 1;
- 142   1        timer1_init();
- 143   1        VF_ON = 1;
- 144   1        while (1);
- 145   1      }
+ 117            0x0C42, // x
+ 118            0xC0A8, // y
+ 119            0x200A, // z
+ 120            0x281A, // {
+ 121            0x0081, // |
+ 122            0x4458, // }
+ 123            0x6042, // ~
+ 124          };
+ 125          
+ 126          void timer1_init(void)
+ 127          {
+ 128   1        TMOD &= 0x0F;
+ 129   1        TMOD |= 0x20;
+ 130   1        TH1 = 0x00;
+ 131   1        TL1 = 0x00;
+ 132   1        ET1 = 1;
+ 133   1        EA  = 1;
+ 134   1        TR1 = 1;
+ 135   1      }
+ 136          
+ 137          void timer1_isr(void) interrupt 3
+ 138          {
+ 139   1        if (VF_OK) {
+ 140   2          unsigned char ch = display_buffer[gate];
+ 141   2          unsigned short display;
+ 142   2          if ((ch < ' ') || (ch > '~'))
+ 143   2            display = 0x0000;
+ 144   2          else
+ 145   2            display = font_table[ch - ' '];
+ 146   2          VGP_ON = 1;
+ 147   2          P1 = 0x00;
+ 148   2          P3 = (P3 & 0x03) | (unsigned char)(display >> 8);
+ 149   2          P2 = (char)display;
+ 150   2          P1 = (unsigned char)0x01 << gate;
+ 151   2          gate = (gate + 1) % DIGIT_COUNT;
+ 152   2        } else
+ 153   1          VGP_ON = 0;
+ 154   1      }
+ 155          
+ 156          void main(void)
+ 157          {
+ 158   1        P0 = 0x00;
+ 159   1        P1 = 0x00;
+ 160   1        P2 = 0x00;
+ 161   1        P3 = 0x00;
+ 162   1        VF_OK = 1;
+ 163   1        timer1_init();
+ 164   1        VF_ON = 1;
+ 165   1        while (1);
+ 166   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    143    ----
+   CODE SIZE        =    162    ----
    CONSTANT SIZE    =    190    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      9    ----
+   DATA SIZE        =      9       3
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
