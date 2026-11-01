@@ -130,7 +130,7 @@ The 95-character printable-ASCII font table is in [`vfd-test-firmware/main.c`](v
 ├── vfd-test-firmware/       # Keil C51 project and STC89C52RC firmware
 │   ├── main.c
 │   └── Objects/              # Generated HEX and other build files
-├── vfd-test-pcb/             # Schematic project, backups, and schematic PDF
+├── vfd-test-pcb/             # Schematic project and schematic PDF
 ├── vfd_top.jpg               # Operating board, top side
 ├── vfd_bottom.jpg            # Board underside
 └── LICENSE                   # MIT License

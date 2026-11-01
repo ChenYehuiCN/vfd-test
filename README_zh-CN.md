@@ -130,7 +130,7 @@ minicom -D /dev/ttyUSB0 -b 9600
 ├── vfd-test-firmware/       # Keil C51 工程和 STC89C52RC 固件
 │   ├── main.c
 │   └── Objects/              # 编译生成的 HEX 等文件
-├── vfd-test-pcb/             # 原理图工程、备份和 PDF 原理图
+├── vfd-test-pcb/             # 原理图工程和 PDF 原理图
 ├── vfd_top.jpg               # 正面点亮图
 ├── vfd_bottom.jpg            # 板子背面图
 └── LICENSE                   # MIT 许可证
